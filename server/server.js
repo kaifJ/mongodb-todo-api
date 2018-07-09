@@ -4,7 +4,8 @@ const _ = require('lodash');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
-var {Users} = require('./models/users');
+var {User} = require('./models/users');
+var {authenticate} = require('./middleware/authenticate');
 const {ObjectID} = require('mongodb');
 
 app = express();
@@ -88,7 +89,7 @@ app.patch('/todos/:id',(req,res)=>{
 //post method for users
 app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
-  var user = new Users(body);
+  var user = new User(body);
 
   user.save().then(()=>{
     return user.generateAuthToekn();
@@ -98,6 +99,11 @@ app.post('/users', (req, res) => {
 
 });
 
+
+//fetch authenticated user
+app.get('/users/me',authenticate,(req,res)=>{
+  res.send(req.user);
+});
 
 app.listen(port,()=>{
   console.log('Server running on port '+port);
